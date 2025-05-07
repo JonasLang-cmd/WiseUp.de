@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deutsch Fachbegriff-Abfrager</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center; /* Zentriert die Inhalte horizontal */
+            align-items: center; /* Zentriert die Inhalte vertikal */
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+            background: radial-gradient(circle, #011099, #0083fd, #00f2fa);
+        }
+
+        .quiz-container {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+            max-width: 500px;
+            margin: auto;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .quiz-container:hover {
+            transform: scale(1.02);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .options button {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+        }
+        div {
+    width: auto; /* Passt sich automatisch an den Inhalt an */
+    height: auto; /* Passt sich an den Inhalt an */
+}
+
+        .options button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .correct {
+            background-color: #2ecc71 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .wrong {
+            background-color: #e74c3c !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        button {
+            background-color: #f39c12;
+            color: white;
+            font-size: 18px;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #e67e22;
+        }
+
+        #timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        #score {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Deutsch Fachbegriff-Abfrager</h1>
+        <p id="question"></p>
+        <div class="options" id="options"></div>
+        <p id="result"></p>
+        <p>Punkte: <span id="score">0</span></p>
+        <p>Zeit übrig: <span id="timer">10</span> Sekunden</p>
+        <button onclick="nextQuestion()">Nächste Frage</button>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Was bedeutet 'Syntax'?", answers: ["Satzlehre", "Namenwort", "Zeitwort", "Tunwort"], correct: "Satzlehre" },
+            { question: "Was ist ein 'Nomen'?", answers: ["Namenwort", "Zeitwort", "Tunwort", "Eigenschaftswort"], correct: "Namenwort" },
+            { question: "Was bedeutet 'Verb'?", answers: ["Tunwort", "Namenwort", "Eigenschaftswort", "Fürwort"], correct: "Tunwort" },
+            { question: "Was ist ein 'Adjektiv'?", answers: ["Eigenschaftswort", "Fürwort", "Namenwort", "Tunwort"], correct: "Eigenschaftswort" },
+            { question: "Was ist ein 'Präposition'?", answers: ["Verhältniswort", "Zeitwort", "Namenwort", "Eigenschaftswort"], correct: "Verhältniswort" },
+            { question: "Was macht ein 'Pronomen'?", answers: ["Ersetzt ein Nomen", "Beschreibt ein Nomen", "Drückt eine Handlung aus", "Zeigt eine Richtung an"], correct: "Ersetzt ein Nomen" },
+            { question: "Was ist ein 'Konjunktion'?", answers: ["Bindewort", "Eigenschaftswort", "Zeitwort", "Namenwort"], correct: "Bindewort" },
+            
+            { question: "Was ist ein 'Artikel'?", answers: ["Begleitwort eines Nomens", "Verb", "Eigenschaftswort", "Präposition"], correct: "Begleitwort eines Nomens" },
+            { question: "Was bezeichnet ein 'Numeral'?", answers: ["Zahlwort", "Fürwort", "Bindewort", "Verb"], correct: "Zahlwort" },
+            { question: "Was ist ein 'Deklination'?", answers: ["Beugung eines Nomens", "Beugung eines Verbs", "Satzstruktur", "Eigenschaft"], correct: "Beugung eines Nomens" },
+            { question: "Was bedeutet 'Konjugation'?", answers: ["Beugung eines Verbs", "Satzstruktur", "Eigenschaftswort", "Zahlwort"], correct: "Beugung eines Verbs" },
+           
+            { question: "Was bedeutet 'Kasus'?", answers: ["Fall eines Nomens", "Tunwort", "Eigenschaftswort", "Fürwort"], correct: "Fall eines Nomens" },
+            { question: "Was ist ein 'Genus'?", answers: ["Geschlecht eines Nomens", "Tunwort", "Eigenschaftswort", "Bindewort"], correct: "Geschlecht eines Nomens" }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer = 10;
+        let timerInterval;
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            timer = 10;
+            document.getElementById("timer").innerText = timer;
+            timerInterval = setInterval(updateTimer, 1000);
+
+            const questionObj = questions[currentQuestionIndex];
+            document.getElementById("question").innerText = questionObj.question;
+            const optionsContainer = document.getElementById("options");
+            optionsContainer.innerHTML = "";
+            
+            questionObj.answers.forEach(answer => {
+                let button = document.createElement("button");
+                button.innerText = answer;
+                button.onclick = () => checkAnswer(button, answer);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function updateTimer() {
+            timer--;
+            document.getElementById("timer").innerText = timer;
+            if (timer === 0) {
+                clearInterval(timerInterval);
+                nextQuestion();
+            }
+        }
+
+        function checkAnswer(button, answer) {
+            const correctAnswer = questions[currentQuestionIndex].correct;
+            if (answer === correctAnswer) {
+                button.classList.add("correct");
+                score++;
+                document.getElementById("score").innerText = score;
+            } else {
+                button.classList.add("wrong");
+            }
+            clearInterval(timerInterval);
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                document.getElementById("question").innerText = "Quiz beendet! Endpunktzahl: " + score;
+                document.getElementById("options").innerHTML = "";
+                document.getElementById("timer").innerText = "0";
+            }
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
